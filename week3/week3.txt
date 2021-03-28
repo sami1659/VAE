@@ -1,0 +1,75 @@
+In the first figure, I plot the samples from the 8-gaussians dataset(red
+points) and sampled from the trained model(blue points). is that true?
+of course I just use 10 epochs because it took a long time.
+
+That looks alright to me. A few suggestions:
+* Make the network smaller, e.g., use K=100.
+* Run more epochs, e.g., 1000, but implement an early stopping heuristic so that it can abort training when converged.
+
+For 100 epochs and K=100 I obtain the attached figure which looks quite good actually.
+
+And about loss function, should we always use BCE loss for
+Reconstrunction Loss in addition with Killback-Leibler divergence
+Loss?(I didn't use BCE loss)
+
+The loss to use depends on the likelihood we assume at the decoder. You currently consider a squared loss, 
+which is the result of using a Gaussian likelihood. For continuous data, as you have it,
+ let's continue using the Gaussian likelihood as you do. The BCE loss is most commonly used for binary/categorical data, e.g., pixels in MNIST images.
+
+One of the sites wrote that the problem with vanilla is that it can not
+generate data, but do we use this type of VAE to generate data! is that
+true?
+
+That doesn't sound right? Can you point me to the page? That's only true for autoencoders. Maybe the page meant to say that it doesn't do a good job at generating samples?
+
+"I think we can model the mu and var with two more nets. Specifically,
+first, we use a neural network f to map the input x to its latent
+correspondent z, then we design two independent nets g and h, and let mu
+= g(z) and var = h(z). The input and output size of g and h should be
+identical. This will allow more flexibility in the model.
+
+This means that from the latent z, which is in your case computed in the forward() function, could go through two 
+separate sets of linear layers and activations, one set of layers computing the mean, the other set of layers computing the variance.
+
+Some comments on your code:
+* The code looks in general quite good.
+* To simplify the definition of the layers in the VAE and the usage of the nonlinearities,
+ you can use torch.nn.Sequential.
+* Aim to integrate the prior into your model in the sense that at a later stage we could easily replace the prior. 
+Currently, for instance, you sample from the prior in __main__ to generate data. That should rather be part of the VAE as not each VAE we consider will probably use a zero-mean unit-variance
+ Gaussian and it is then error-prone to do such sampling outside of the VAE.
+
+What are next steps from perspective? From my perspective it would be great to run an experiment in which you
+ report some form of error between the data generated from the VAE and the original data over different number of sizes of the latent space.
+
+Best regards,
+Sebastian Tschiatschek
+
+On 14.03.21 18:37, Khadijeh Arabi wrote:
+
+Dear Sebastian Tschiatschek,
+
+Thank you for answer to my questions, that was very helpful.
+I try to generate standard toy 8-gaussians dataset, and train and regenerate with VAE(vanilla). I put my codes along with a brief explanation in the following link :
+
+https://github.com/sami1659/VAE/blob/master/week2/VAE-8guass.ipynb
+
+In the first figure, I plot the samples from the 8-gaussians dataset(red points) and sampled from the trained model(blue points). is that true? of course I just use 10 epochs because it took a long time.
+
+and Also I have some questions:
+
+One of the sites wrote that the problem with vanilla is that it can not generate data, but do we use this type of VAE to generate data! is that true?
+
+And about loss function, should we always use BCE loss for Reconstrunction Loss in addition with Killback-Leibler divergence Loss?(I didn't use BCE loss)
+
+Of course in this step it's not clear for me but I read the comment of someone that wrote:
+"I think we can model the mu and var with two more nets. Specifically, first, we use a neural network f to map the input x to its latent correspondent z, then we design two independent nets g and h, and let mu = g(z) and var = h(z). The input and output size of g and h should be identical. This will allow more flexibility in the model."
+
+It seems interesting but I don't know about that.
+
+Thank you for taking the time to read the explanation and answering the questions.
+
+Best Regards,
+Khadijeh Arabi
+index.png
+index.png
