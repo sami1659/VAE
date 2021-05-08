@@ -1,0 +1,12 @@
+Regarding the likelihood computation. I hope I understood correctly what you wrote. Computing the reconstruction loss will not measure how well the model generates data from the distribution that we want to fit. My assumption is that the reconstruction loss will be very small (please verify) but that the samples, i.e., the encoded distribution in the VAE, is bad. That means that the likelihood of the data under the model is small. Maybe a simple way of approximating the likelihood of the data under the model is the following:
+
+1) Train the VAE on X_data
+2) Generate a lot of samples X_model from the VAE
+3) Perform kernel density estimation on X_model
+4) Compute the likelihood of X_data under the kernel density estimate
+
+Regarding the problem with the code:
+
+* You generate mu and logvar in VAE.decode() using fc4 and fc5
+* But fc4 and fc5 have different output dimensions
+* Changing fc4 to "self.fc4 = nn.Linear(K, 2)" solves the problem
